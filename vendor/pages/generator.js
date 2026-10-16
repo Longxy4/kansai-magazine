@@ -380,44 +380,24 @@ ENRICHMENT GUIDE:
         <div id="flipbook-container">
             <div id="flipbook" data-double-spread="${doubleSpread}">${pagesHtml}</div>
         </div>
-        <div id="top-controls-panel">
+        <div id="controls-panel" role="toolbar" aria-label="閲覧操作">
+            <button id="toc-btn" class="icon-btn" aria-label="Table of Contents" style="display:none">目次</button>
+            <div class="page-input-container">
+                <button id="prev-page-btn" class="page-nav-btn" aria-label="Previous Page">‹</button>
+                <input type="number" id="page-input" aria-label="Page number" min="1" max="${actualPageCount}" value="1">
+                <span id="total-pages" aria-label="総ページ数">/ ${actualPageCount}</span>
+                <button id="next-page-btn" class="page-nav-btn" aria-label="Next Page">›</button>
+            </div>
             <div class="zoom-controls">
                 <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1" aria-label="Zoom">
                 <div id="zoom-level">1x</div>
             </div>
-            <button id="fullscreen-btn" aria-label="Toggle Fullscreen">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-                </svg>
+            <button id="fullscreen-btn" aria-label="Toggle Fullscreen" title="全画面">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
             </button>
-        </div>
-        <div id="controls-panel">
-            <button id="toc-btn" class="icon-btn" aria-label="Table of Contents" style="display: none;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M3 12h18M3 18h18"/>
-                </svg>
-            </button>
-
-            <div class="page-input-container">
-                <button id="prev-page-btn" class="page-nav-btn" aria-label="Previous Page">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 18l-6-6 6-6"/>
-                    </svg>
-                </button>
-                <input type="number" id="page-input" aria-label="Page number" min="1" max="${actualPageCount}" value="1">
-                <button id="next-page-btn" class="page-nav-btn" aria-label="Next Page">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 18l6-6-6-6"/>
-                    </svg>
-                </button>
-            </div>
-            
-            <button id="page-links-btn" class="icon-btn" aria-label="Page Links" style="display: none;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
-            </button>
+            <button id="issue-share" aria-label="共有" aria-haspopup="dialog">共有</button>
+            <a id="issue-pdf" href="__ISSUE_PDF__" target="_blank" rel="noopener">PDF</a>
+            <button id="page-links-btn" class="icon-btn" aria-label="Page Links" style="display:none">リンク</button>
         </div>
 
         <div id="toc-modal" class="toc-modal hidden">

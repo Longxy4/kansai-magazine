@@ -2,7 +2,7 @@
 
 阅读链接： https://longxy4.github.io/kansai-magazine/?issue=2026-07
 
-采用 [S-poony/Pages](https://github.com/S-poony/Pages) 的原有阅读界面和翻页引擎，无杂志首页。每期一个独立链接，电脑双页、手机竖屏单页，支持缩放、复制链接及分享二维码。
+采用 [S-poony/Pages](https://github.com/S-poony/Pages) 的原有阅读界面和翻页引擎，无杂志首页。每期一个独立链接，电脑双页、手机竖屏单页，全部阅读操作集中在不遮挡正文的底栏；页码显示当前页与总页数。支持缩放和统一分享窗口（二维码＋复制链接），复制提示两秒后自动消失。
 
 ## 你以后每期只需要做三步
 

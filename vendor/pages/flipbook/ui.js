@@ -44,11 +44,11 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     if (fullscreenBtn) {
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                if (typeof wrapper.requestFullscreen !== 'function') {
+                if (typeof document.documentElement.requestFullscreen !== 'function') {
                     document.getElementById('share-status').textContent = 'この端末では全画面表示を利用できません';
                     return;
                 }
-                wrapper.requestFullscreen().catch(err => {
+                document.documentElement.requestFullscreen().catch(err => {
                     console.error('Error attempting to enable fullscreen:', err);
                 });
             } else {
@@ -417,7 +417,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
 
     // Keyboard navigation
     document.addEventListener('keydown', e => {
-        if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        if (document.querySelector('dialog[open]') || ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
         if (isZoomed()) {
             if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
             return;
@@ -472,7 +472,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     };
 
     wrapper.addEventListener('mousedown', (e) => {
-        if (e.target.closest('#controls-panel') || e.target.closest('#top-controls-panel')) return;
+        if (e.target.closest('#controls-panel') || e.target.closest('#top-controls-panel') || e.target.closest('dialog')) return;
         onStart(e.clientX, e.clientY);
     });
     window.addEventListener('mousemove', (e) => {
@@ -485,7 +485,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     });
     window.addEventListener('mouseup', onEnd);
     wrapper.addEventListener('touchstart', (e) => {
-        if (e.target.closest('#controls-panel') || e.target.closest('#top-controls-panel')) return;
+        if (e.target.closest('#controls-panel') || e.target.closest('#top-controls-panel') || e.target.closest('dialog')) return;
         if (e.touches.length === 1) onStart(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
     window.addEventListener('touchmove', (e) => {
