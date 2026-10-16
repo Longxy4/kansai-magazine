@@ -11,40 +11,5 @@ concurrency:
   group: magazine-pages
   cancel-in-progress: false
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Check reader controls
-        run: node --test tests/reader-inputs.test.mjs
-      - name: Install PDF rendering tools
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y poppler-utils
-          python -m pip install -r scripts/requirements.txt
-      - name: Check PDF interactions
-        run: python -m unittest discover -s tests -p 'test_*.py'
-      - name: Render PDFs and generate Pages readers
-        run: |
-          python scripts/render-issues.py
-          node scripts/build-site.mjs
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+  publish:
+    uses: Longxy4/kansai-magazine-system/.github/workflows/publish.yml@main
