@@ -17,11 +17,11 @@ https://longxy4.github.io/kansai-magazine/?issue=2026-07
 每张 PDF 包含左右两个页面。首张右半为封面、左半为封底，其余按 PDF 顺序、先左后右阅读。本期 15 张跨页对应 30 个阅读页面。若未来 PDF 改为单页或印刷拼版格式，需先调整阅读器。
 
 ## 阅读功能
-电脑默认双页，手机默认单页；可手动切换。支持首尾页、左右键、正常缩放下滑动翻页、放大后滚动查看、分享链接及本地生成二维码。PDF 按钮打开原文件，其中的原有链接可点击；阅读器中的画布不支持 PDF 内部链接。
+阅读器采用 [flipbook-vue](https://github.com/ts1/flipbook-vue) 0.10.4（MIT）。直接复用其翻页动画、拖拽/滑动、响应式单双页和 1×/2×/4× 缩放，适配层只处理 PDF 拆页、期号及分享二维码。电脑宽屏默认双页，手机竖屏默认单页；可强制单页。支持左右键翻页、点击放大、放大后拖动查看、分享链接及本地生成二维码。首次打开会将 15 张 PDF 跨页转换为 30 张阅读页面，显示准备进度。PDF 按钮打开原文件，其中的原有链接可点击；阅读器中的画布不支持 PDF 内部链接。
 
 ## 部署与依赖
 GitHub Pages 使用 main 分支根目录，免费静态托管。PDF 和脚本均保存在此仓库，阅读时不依赖外部 CDN，也不调用收费服务。供应商的免费额度和服务政策仍适用。
 
-vendor/ 保存 PDF.js 4.10.38（Apache-2.0）及 qrcode-generator 1.4.4（MIT），升级时必须同时替换 PDF.js 主程序和 worker，并重新测试。
+vendor/ 固定保存 flipbook-vue 0.10.4（MIT）、Vue 2.7.16（MIT）、PDF.js 4.10.38（Apache-2.0）及 qrcode-generator 1.4.4（MIT）。flipbook-vue 发布包内还含 Rematrix 的 MIT 许可证。各许可证随源码保存；组件使用方式参考上游 README 与 examples/demo/src/App.vue。升级时必须同时替换 PDF.js 主程序和 worker，并重新测试。
 
 无法阅读时检查：issues 中是否有完全匹配的文件名；Actions 的 Pages 部署是否完成；刷新页面后重试。不要只凭部署绿色就判断 PDF 已上传。

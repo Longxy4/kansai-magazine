@@ -1,94 +1,75 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>関西通信 | freebird Kansai</title>
 <style>
-:root{color-scheme:light;background:#eee9e1;color:#322a24;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
-*{box-sizing:border-box}body{margin:0}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;background:#fff9f1;border-bottom:1px solid #ddd1c4}
-h1{font-size:1rem;margin:0}.subtitle{font-size:.75rem;color:#806d60;margin-top:4px}
-.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 10px}
-button,a.action{font:inherit;border:1px solid #b7aaa1;background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer;color:inherit;text-decoration:none}button:hover,a.action:hover{background:#ffebd8}button:disabled{opacity:.35;cursor:default}
-#status{text-align:center;min-height:1.5rem;color:#76675d;font-size:.85rem;padding:0 12px}
-#stage{display:flex;justify-content:center;align-items:center;min-height:60vh;padding:16px;overflow:auto}
-#book{display:flex;align-items:stretch;justify-content:center;gap:2px;flex-shrink:0;margin:auto;filter:drop-shadow(0 12px 16px #0003)}
-.sheet{background:#fff;display:block;height:auto;object-fit:contain;max-height:none;width:auto;max-width:none;flex-shrink:0;box-shadow:0 0 1px #bbb}
-.sheet.blank{background:transparent;box-shadow:none}
-#book.animating{animation:turn .28s ease-in-out}@keyframes turn{0%{opacity:.65;transform:perspective(900px) rotateY(-5deg)}100%{opacity:1;transform:none}}
-footer{text-align:center;font-size:.76rem;color:#85776a;padding:0 12px 20px}
-#qrModal{border:0;border-radius:15px;padding:25px;max-width:90vw;text-align:center}#qrModal::backdrop{background:#0008}#qr svg{width:240px;max-width:70vw;height:auto}#qr{margin:12px auto;display:flex;justify-content:center}
-@media(max-width:650px){header{padding:10px 14px}#stage{min-height:58vh;padding:8px}#book .sheet{max-width:none;max-height:none}#book .sheet.blank{display:none}.controls{gap:5px}.controls button{padding:7px 9px;font-size:.85rem}}
-</style></head><body>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#352c25;background:#eee9e1;color-scheme:light}*{box-sizing:border-box}body{margin:0}header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:#fff9f1;border-bottom:1px solid #ddd1c4}h1{margin:0;font-size:1rem}.subtitle{font-size:.75rem;color:#806d60;margin-top:3px}button,a.action{font:inherit;color:inherit;border:1px solid #c5b8ab;border-radius:8px;padding:8px 12px;background:#fff;text-decoration:none;cursor:pointer}button:disabled{opacity:.4;cursor:default}button:focus-visible,a:focus-visible{outline:3px solid #ce7b28;outline-offset:2px}.tools{display:flex;justify-content:center;flex-wrap:wrap;align-items:center;gap:7px;padding:12px 8px}.page-number{min-width:95px;text-align:center;font-size:.85rem}.flipbook .viewport{width:100% !important;height:calc(100dvh - 205px) !important;min-height:280px}.flipbook .bounding-box{box-shadow:0 5px 20px #0003}#loading{padding:25px;text-align:center}#error{color:#9a2818;text-align:center;padding:20px}#notice{text-align:center;font-size:.8rem;min-height:1.2em}footer{text-align:center;font-size:.74rem;color:#796d62;padding:8px 12px}footer a{color:inherit}dialog{border:0;border-radius:14px;text-align:center;max-width:90vw;padding:24px}dialog::backdrop{background:#0008}#qr svg{width:230px;max-width:70vw;height:auto;display:block;margin:15px auto}[v-cloak]{display:none}@media(max-width:650px){header{padding:10px 12px}.tools{gap:5px;padding:10px 6px}button,a.action{padding:7px 9px;font-size:.85rem}.flipbook .viewport{height:calc(100dvh - 240px) !important}}
+</style>
+</head>
+<body>
 <header><div><h1>関西通信</h1><div class="subtitle">日中学生交流団体 freebird 関西支部</div></div><div id="issueLabel"></div></header>
-<div class="controls"><button id="first">|‹</button><button id="prev">‹ 前へ</button><button id="next">次へ ›</button><button id="last">›|</button><button id="layout">単頁 / 見開き</button><button id="minus">−</button><button id="plus">＋</button><button id="full">全画面</button><button id="share">共有</button><button id="qrBtn">QR</button><a class="action" id="download">PDF</a></div>
-<div id="status" role="status">読み込み中...</div><main id="stage"><div id="book" aria-label="雑誌の閲覧画面"><canvas id="left" class="sheet"></canvas><canvas id="right" class="sheet"></canvas></div></main>
-<footer>← → キーでもページをめくれます。スマートフォンではスワイプ、拡大後はスクロールして閲覧できます。</footer>
+<div id="loading" role="status">読み込み中…</div>
+<div id="error" role="alert" hidden></div>
+<div id="app" v-cloak>
+<flipbook v-if="pages.length" ref="book" class="flipbook" :pages="pages" :single-page="single" :zooms="[1,2,4]" :flip-duration="650" :zoom-duration="300" v-slot="book">
+<div class="tools" aria-label="閲覧操作">
+<button @click="book.flipLeft" :disabled="!book.canFlipLeft" aria-label="前のページ">‹ 前へ</button>
+<span class="page-number" role="status">{{book.page}} / {{book.numPages}}</span>
+<button @click="book.flipRight" :disabled="!book.canFlipRight" aria-label="次のページ">次へ ›</button>
+<button @click="book.zoomOut" :disabled="!book.canZoomOut" aria-label="縮小">−</button>
+<button @click="book.zoomIn" :disabled="!book.canZoomIn" aria-label="拡大">＋</button>
+<button @click="single=!single">{{single?'表示：自動':'表示：単頁'}}</button>
+<button @click="full">全画面</button><button @click="share">共有</button><button @click="qr">QR</button><a class="action" :href="pdfUrl" target="_blank" rel="noopener">PDF</a>
+</div>
+</flipbook>
+<div id="notice" role="status">{{notice}}</div>
+</div>
+<footer>ドラッグ・スワイプで翻頁。クリックで拡大し、拡大後はドラッグで移動。<br>Powered by <a href="https://github.com/ts1/flipbook-vue" target="_blank" rel="noopener">flipbook-vue</a> / PDF.js</footer>
 <dialog id="qrModal"><strong>この号のQRコード</strong><div id="qr"></div><button id="closeQR">閉じる</button></dialog>
-<script src="./vendor/qrcode.js"></script>
+<script src="./vendor/vue.global.prod.js"></script><script src="./vendor/flipbook-vue.min.js"></script><script src="./vendor/qrcode.js"></script>
 <script type="module">
 import * as pdfjs from './vendor/pdf.min.mjs';
-
 pdfjs.GlobalWorkerOptions.workerSrc='./vendor/pdf.worker.min.mjs';
-const $=id=>document.getElementById(id), issue=new URLSearchParams(location.search).get('issue')||'2026-07';
-if(!/^\d{4}-\d{2}$/.test(issue)){ $('status').textContent='号数の形式が正しくありません';throw Error('Invalid issue') }
-const pdfUrl='./issues/'+issue+'.pdf';
-$('issueLabel').textContent=issue;$('download').href=pdfUrl;
-document.title='関西通信 '+issue+' | freebird Kansai';
-let pdf, logical=[],position=0,zoom=1,token=0;
-let single=matchMedia('(max-width:650px)').matches;
-const isMobile=()=>single;
+const $=id=>document.getElementById(id),issue=new URLSearchParams(location.search).get('issue')||'2026-07';
+const valid=/^\d{4}-(0[1-9]|1[0-2])$/.test(issue),pdfUrl='./issues/'+issue+'.pdf';
 const shareUrl=new URL(location.href);shareUrl.search='?issue='+issue;shareUrl.hash='';
-$('layout').onclick=()=>{single=!single;position=single||position===0?position:position%2===0?position-1:position;display()};
-function buildSequence(count){
-  // 印刷用見開きPDF: 最初の左半分が裏表紙、右半分が表紙。
-  const seq=[{spread:1,half:1}];
-  for(let i=2;i<=count;i++){seq.push({spread:i,half:0},{spread:i,half:1})}
-  seq.push({spread:1,half:0});return seq;
-}
-const renders=new Map();
-function renderSpread(n){
- if(!renders.has(n)) renders.set(n,(async()=>{
-  const page=await pdf.getPage(n),base=page.getViewport({scale:1});
-  const viewport=page.getViewport({scale:Math.min(3,2400/base.width)});
-  const tmp=document.createElement('canvas');tmp.width=Math.ceil(viewport.width);tmp.height=Math.ceil(viewport.height);
-  await page.render({canvasContext:tmp.getContext('2d'),viewport}).promise;return tmp;
- })());
- const task=renders.get(n);
- // Keep only a small number of spreads in memory on phones.
- while(renders.size>3) renders.delete(renders.keys().next().value);
- return task;
-}
-async function draw(canvas,item,request){
- if(!item){canvas.hidden=true;canvas.style.display='none';return}
- const tmp=await renderSpread(item.spread);if(request!==token)return;
- const half=Math.floor(tmp.width/2),sx=item.half?half:0,sw=item.half?tmp.width-half:half;
- canvas.width=sw;canvas.height=tmp.height;canvas.getContext('2d').drawImage(tmp,sx,0,sw,tmp.height,0,0,sw,tmp.height);
- const available=Math.max(200,$('stage').clientWidth-32);
- const fit=Math.min((available-(single?0:2))/(single?1:2),Math.max(240,innerHeight-230)*sw/tmp.height);
- canvas.style.width=Math.round(fit*zoom)+'px';canvas.style.height='auto';canvas.hidden=false;canvas.style.display='block';
-}
-async function display(){
- if(!pdf)return; const request=++token, mobile=isMobile();
- const left=mobile?null:position===0?null:logical[position];
- const right=mobile?logical[position]:position===0?logical[0]:logical[position+1]||null;
- $('book').classList.remove('animating');void $('book').offsetWidth;$('book').classList.add('animating');
- $('layout').textContent=single?'見開きに切替':'単頁に切替';
- try{await Promise.all([draw($('left'),left,request),draw($('right'),right,request)])}catch(e){if(request===token)$('status').textContent='ページの描画に失敗しました。再読み込みしてください。';console.error(e);return}
- if(request!==token)return;
- $('status').textContent=mobile?('ページ '+(position+1)+' / '+logical.length):(position===0?'表紙':position===logical.length-1?'裏表紙':('ページ '+(position+1)+'–'+Math.min(position+2,logical.length)+' / '+logical.length));
- $('prev').disabled=position===0;$('first').disabled=position===0;
- $('next').disabled=position>=logical.length-1;$('last').disabled=position>=logical.length-1;
-}
-function move(direction){const step=isMobile()?1:2;if(direction>0){position=position===0&&!isMobile()?1:Math.min(logical.length-1,position+step)}else{position=position<=1&&!isMobile()?0:Math.max(0,position-step)}display()}
-$('prev').onclick=()=>move(-1);$('next').onclick=()=>move(1);
-$('first').onclick=()=>{position=0;display()};$('last').onclick=()=>{position=logical.length-1;display()};
-$('plus').onclick=()=>{zoom=Math.min(2,zoom+.2);display()};$('minus').onclick=()=>{zoom=Math.max(.7,zoom-.2);display()};
-$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('status').textContent='この端末では全画面表示を利用できません'}};
-$('share').onclick=async()=>{try{await navigator.clipboard.writeText(shareUrl.href);$('status').textContent='リンクをコピーしました'}catch{prompt('このリンクをコピー',shareUrl.href)}};
-$('qrBtn').onclick=()=>{try{const code=qrcode(0,'M');code.addData(shareUrl.href);code.make();$('qr').innerHTML=code.createSvgTag(5,20);$('qrModal').showModal()}catch(e){$('status').textContent='QRコードを生成できません。共有ボタンでリンクをコピーしてください';console.error(e)}};
+$('issueLabel').textContent=issue;document.title='関西通信 '+issue+' | freebird Kansai';
+const vm=new Vue({
+ el:'#app',
+ data:()=>({pages:[],single:false,pdfUrl,notice:''}),
+ methods:{
+  async full(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{this.notice='この端末では全画面表示を利用できません'}},
+  async share(){try{await navigator.clipboard.writeText(shareUrl.href);this.notice='リンクをコピーしました'}catch{prompt('このリンクをコピー',shareUrl.href)}},
+  qr(){const qr=qrcode(0,'M');qr.addData(shareUrl.href);qr.make();$('qr').innerHTML=qr.createSvgTag(5,20);$('qrModal').showModal()}
+ }
+});
+
 $('closeQR').onclick=()=>$('qrModal').close();
-document.addEventListener('keydown',e=>{if($('qrModal').open||e.target.matches('input,select,textarea'))return;if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1)});
-let x=0;$('stage').addEventListener('touchstart',e=>{x=e.changedTouches[0].screenX},{passive:true});$('stage').addEventListener('touchend',e=>{let d=e.changedTouches[0].screenX-x;if(zoom<=1&&e.changedTouches.length===1&&Math.abs(d)>60)move(d<0?1:-1)},{passive:true});
-let resizeTimer;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(display,150)});
-for(const id of ['first','prev','next','last','plus','minus','layout'])$(id).disabled=true;
-try{pdf=await pdfjs.getDocument(pdfUrl).promise;logical=buildSequence(pdf.numPages);for(const id of ['plus','minus','layout'])$(id).disabled=false;await display()}
-catch(e){$('status').textContent='PDFが見つからないか読み込めません: '+issue+'.pdf';console.error(e)}
-</script></body></html>
+document.addEventListener('keydown',e=>{if($('qrModal').open)return;const book=vm.$refs.book;if(!book)return;if(e.key==='ArrowRight'&&book.canFlipRight)book.flipRight();if(e.key==='ArrowLeft'&&book.canFlipLeft)book.flipLeft()});
+// Only the PDF spread-to-image adapter is specific to this magazine.
+// flipbook-vue owns page turns, responsive page layout, dragging and zoom.
+try{
+ if(!valid)throw Error('Invalid issue');
+ const pdf=await pdfjs.getDocument(pdfUrl).promise;
+ const pages=[null],covers=[];
+ for(let n=1;n<=pdf.numPages;n++){
+  $('loading').textContent='誌面を準備中 '+n+' / '+pdf.numPages;
+  const page=await pdf.getPage(n),base=page.getViewport({scale:1}),viewport=page.getViewport({scale:3200/base.width});
+  const spread=document.createElement('canvas');spread.width=Math.ceil(viewport.width);spread.height=Math.ceil(viewport.height);
+  await page.render({canvasContext:spread.getContext('2d'),viewport}).promise;
+  const halves=[];
+  for(let side=0;side<2;side++){
+   const x=side?Math.floor(spread.width/2):0,w=side?spread.width-x:Math.floor(spread.width/2);
+   const canvas=document.createElement('canvas');canvas.width=w;canvas.height=spread.height;
+   canvas.getContext('2d').drawImage(spread,x,0,w,spread.height,0,0,w,spread.height);
+   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.92));
+   if(!blob)throw Error('Image conversion failed');halves.push(URL.createObjectURL(blob));canvas.width=canvas.height=0;
+  }
+  if(n===1){covers.push(...halves);pages.push(halves[1])}else pages.push(...halves);
+  spread.width=spread.height=0;page.cleanup();
+ }
+ pages.push(covers[0]);vm.pages=pages;$('loading').hidden=true;await pdf.destroy();
+}catch(e){$('loading').hidden=true;$('error').hidden=false;$('error').textContent=valid?'PDFを読み込めません。時間をおいて再読み込みするか、PDFファイルを確認してください。':'号数の形式が正しくありません。';console.error(e)}
+</script>
+</body></html>
