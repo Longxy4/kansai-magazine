@@ -18,9 +18,11 @@
 <details>
 <summary>編集担当者向け：発行・更新方法</summary>
 
-1. `issues` フォルダーで **Add file → Upload files** を選び、`YYYY-MM.pdf` の名前でアップロードして `main` に保存します。
+1. `issues` フォルダーで **Add file → Upload files** を選び、PDF をアップロードして `main` に保存します。`関西通信2025年9月号.pdf`、`2026年特別号.pdf`、`特别号.pdf`、従来の `YYYY-MM.pdf` に対応しています。
 2. [Actions の Publish magazine](https://github.com/Longxy4/kansai-magazine/actions/workflows/publish.yml) が成功したら、実際の閲覧リンクを確認します。
-3. 各号の固定リンクは `https://longxy4.github.io/kansai-magazine/?issue=YYYY-MM` です。バックナンバーの表にもリンクを追記できます。同じ号の訂正は同名PDFを上書きしてください。
+3. 通常号の固定リンクは `https://longxy4.github.io/kansai-magazine/?issue=YYYY-MM` です。`2026年特別号.pdf` は `?issue=2026-special`、年のない特別号は `?issue=special` になります。閲覧画面の共有ボタンから固定リンクをコピーできます。バックナンバーの表にもリンクを追記できます。同じ号の訂正は同名PDFを上書きしてください。
+
+複数年の特別号を公開する場合は、ファイル名に年を付けてください。同じ号を別名で重複アップロードすると公開処理が停止します。公開済みの閲覧リンクはそのまま使えます。
 
 閲覧システムのソースと詳しい管理手順は [kansai-magazine-system](https://github.com/Longxy4/kansai-magazine-system) にあります。システムを更新した後は、この公開用リポジトリで **Publish magazine → Run workflow** を実行します。
 
