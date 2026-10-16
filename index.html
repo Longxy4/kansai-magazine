@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>関西通信 | freebird Kansai</title>
+<style>
+:root{color-scheme:light;background:#eee9e1;color:#322a24;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+*{box-sizing:border-box}body{margin:0}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;background:#fff9f1;border-bottom:1px solid #ddd1c4}
+h1{font-size:1rem;margin:0}.subtitle{font-size:.75rem;color:#806d60;margin-top:4px}
+.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 10px}
+button,a.action{font:inherit;border:1px solid #b7aaa1;background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer;color:inherit;text-decoration:none}button:hover,a.action:hover{background:#ffebd8}button:disabled{opacity:.35;cursor:default}
+#status{text-align:center;min-height:1.5rem;color:#76675d;font-size:.85rem;padding:0 12px}
+#stage{display:flex;justify-content:center;align-items:center;min-height:60vh;padding:16px;overflow:auto}
+#book{display:flex;align-items:stretch;justify-content:center;gap:2px;max-width:100%;filter:drop-shadow(0 12px 16px #0003)}
+.sheet{background:#fff;display:block;height:auto;object-fit:contain;max-height:calc(100dvh - 210px);width:auto;max-width:calc(46vw * var(--zoom,1));box-shadow:0 0 1px #bbb}
+.sheet.blank{background:transparent;box-shadow:none}
+#book.animating{animation:turn .28s ease-in-out}@keyframes turn{0%{opacity:.65;transform:perspective(900px) rotateY(-5deg)}100%{opacity:1;transform:none}}
+footer{text-align:center;font-size:.76rem;color:#85776a;padding:0 12px 20px}
+#qrModal{border:0;border-radius:15px;padding:25px;max-width:90vw;text-align:center}#qrModal::backdrop{background:#0008}#qr{margin:12px auto;display:flex;justify-content:center}
+@media(max-width:650px){header{padding:10px 14px}#stage{min-height:58vh;padding:8px}#book .sheet{max-width:94vw;max-height:calc(100dvh - 220px)}#book .sheet.blank{display:none}.controls{gap:5px}.controls button{padding:7px 9px;font-size:.85rem}}
+</style></head><body>
+<header><div><h1>関西通信</h1><div class="subtitle">日中学生交流団体 freebird 関西支部</div></div><div id="issueLabel"></div></header>
+<div class="controls"><button id="first">|‹</button><button id="prev">‹ 前へ</button><button id="next">次へ ›</button><button id="last">›|</button><button id="minus">−</button><button id="plus">＋</button><button id="full">全画面</button><button id="share">共有</button><button id="qrBtn">QR</button><a class="action" id="download">PDF</a></div>
+<div id="status" role="status">読み込み中...</div><main id="stage"><div id="book" aria-label="雑誌の閲覧画面"><canvas id="left" class="sheet"></canvas><canvas id="right" class="sheet"></canvas></div></main>
+<footer>← → キーでもページをめくれます。スマートフォンではタップして読み進めてください。</footer>
+<dialog id="qrModal"><strong>この号のQRコード</strong><div id="qr"></div><button id="closeQR">閉じる</button></dialog>
+<script type="module">
+import * as pdfjs from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs';
+import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm';
+pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+const $=id=>document.getElementById(id), issue=new URLSearchParams(location.search).get('issue')||'2026-07';
+if(!/^\d{4}-\d{2}$/.test(issue)){ $('status').textContent='号数の形式が正しくありません';throw Error('Invalid issue') }
+const pdfUrl='./issues/'+issue+'.pdf';
+$('issueLabel').textContent=issue;$('download').href=pdfUrl;
+document.title='関西通信 '+issue+' | freebird Kansai';
+let pdf, logical=[],position=0,zoom=1,token=0;
+const isMobile=()=>matchMedia('(max-width:650px)').matches;
+function buildSequence(count){
+  // 印刷用見開きPDF: 最初の左半分が裏表紙、右半分が表紙。
+  const seq=[{spread:1,half:1}];
+  for(let i=2;i<=count;i++){seq.push({spread:i,half:0},{spread:i,half:1})}
+  seq.push({spread:1,half:0});return seq;
+}
+async function draw(canvas,item,request){
+  canvas.style.display=item?'block':'none';
+  if(!item)return;
+  const page=await pdf.getPage(item.spread);if(request!==token)return;
+  const base=page.getViewport({scale:1});
+  const scale=Math.min(2.2,Math.max(1,1800/base.width));
+  const viewport=page.getViewport({scale});
+  const tmp=document.createElement('canvas');tmp.width=Math.ceil(viewport.width);tmp.height=Math.ceil(viewport.height);
+  await page.render({canvasContext:tmp.getContext('2d'),viewport}).promise;if(request!==token)return;
+  const half=Math.floor(tmp.width/2),sx=item.half?half:0,sw=item.half?tmp.width-half:half;
+  canvas.width=sw;canvas.height=tmp.height;canvas.getContext('2d').drawImage(tmp,sx,0,sw,tmp.height,0,0,sw,tmp.height);
+  canvas.style.width='auto';canvas.style.height='auto';
+}
+async function display(){
+ if(!pdf)return; const request=++token, mobile=isMobile();
+ const left=mobile?null:position===0?null:logical[position];
+ const right=mobile?logical[position]:position===0?logical[0]:logical[position+1]||null;
+ $('book').classList.remove('animating');void $('book').offsetWidth;$('book').classList.add('animating');
+ $('book').style.setProperty('--zoom',zoom);
+ await Promise.all([draw($('left'),left,request),draw($('right'),right,request)]);
+ if(request!==token)return;
+ $('status').textContent=mobile?('ページ '+(position+1)+' / '+logical.length):(position===0?'表紙':position===logical.length-1?'裏表紙':('ページ '+(position+1)+'–'+Math.min(position+2,logical.length)+' / '+logical.length));
+ $('prev').disabled=position===0;$('first').disabled=position===0;
+ $('next').disabled=position>=logical.length-1;$('last').disabled=position>=logical.length-1;
+}
+function move(direction){const step=isMobile()?1:2;if(direction>0){position=position===0&&!isMobile()?1:Math.min(logical.length-1,position+step)}else{position=position<=1&&!isMobile()?0:Math.max(0,position-step)}display()}
+$('prev').onclick=()=>move(-1);$('next').onclick=()=>move(1);
+$('first').onclick=()=>{position=0;display()};$('last').onclick=()=>{position=logical.length-1;display()};
+$('plus').onclick=()=>{zoom=Math.min(2,zoom+.2);display()};$('minus').onclick=()=>{zoom=Math.max(.7,zoom-.2);display()};
+$('full').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+$('share').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);$('status').textContent='リンクをコピーしました'}catch{prompt('このリンクをコピー',location.href)}};
+$('qrBtn').onclick=async()=>{$('qr').replaceChildren();const canvas=document.createElement('canvas');await QRCode.toCanvas(canvas,location.href,{width:220,margin:1});$('qr').append(canvas);$('qrModal').showModal()};
+$('closeQR').onclick=()=>$('qrModal').close();
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1)});
+let x=0;$('stage').addEventListener('touchstart',e=>{x=e.changedTouches[0].screenX},{passive:true});$('stage').addEventListener('touchend',e=>{let d=e.changedTouches[0].screenX-x;if(Math.abs(d)>60)move(d<0?1:-1)},{passive:true});
+matchMedia('(max-width:650px)').addEventListener('change',()=>{position=isMobile()?position:position===0?0:position%2===0?position-1:position;display()});
+try{pdf=await pdfjs.getDocument(pdfUrl).promise;logical=buildSequence(pdf.numPages);await display()}
+catch(e){$('status').textContent='PDFが見つからないか読み込めません: '+issue+'.pdf';console.error(e)}
+</script></body></html>
