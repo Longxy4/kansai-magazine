@@ -47,3 +47,12 @@ test('a bottom-edge touch reveals controls without also turning the page',()=>{
   const f=fixture();const e=f.emit('touchstart',{touches:[{clientY:710}],cancelable:true,stopPropagation(){this.stopped=true;}});
   assert.equal(e.prevented,true);assert.equal(e.stopped,true);assert.equal(f.controls.classes.has('active'),true);
 });
+
+test('PDF links and QR codes near the bottom remain clickable without revealing the dock',()=>{
+  const f=fixture(),target={tagName:'A',closest:()=>({})};
+  f.emit('pointermove',{target,pointerType:'mouse',clientY:710});
+  assert.equal(f.controls.classes.has('active'),false);
+  const e=f.emit('touchstart',{target,touches:[{clientY:710}],cancelable:true,stopPropagation(){this.stopped=true;}});
+  assert.equal(e.prevented,undefined);assert.equal(e.stopped,undefined);
+  assert.equal(f.controls.classes.has('active'),false);
+});

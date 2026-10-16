@@ -19,12 +19,16 @@
 
 适用于本期的横向双页跨页排版：首张右半为封面、左半为封底；随后各张先左后右。15 张跨页生成 30 个阅读页面。未来如果改为竖向单页或印刷拼版格式，需要先修改转换规则。错误格式会让生成步骤报错，已发布的旧站点保留。
 
-阅读器显示的是预先生成的图片，读者不必在手机上转换 PDF。原 PDF 的链接可通过工具栏的 **PDF** 按钮打开使用。
+阅读器显示的是预先生成的图片，读者不必在手机上转换 PDF。原 PDF 中的超链接、书内跳转和二维码会自动转换成可点击区域，沿用 Pages 原有的链接处理与缩放功能。外部链接在新标签页打开。
+
+工具栏的 **目次** 可跳到文章，也可以直接点击杂志目录页的标题。本期按目录印刷页码校正跨页的左右半页，补齐了原 PDF 未链接的 freebird 介绍，并合并跨行标题的重复链接；编辑后记准确跳到右页。阅读器页码包含封面，比内页印刷页码大 1。
+
+本期保留 5 个社交账号链接、Back Number 页的全部 12 个往期封面链接，并自动识别了往期文件夹与读者问卷的 2 个二维码。未来发布仍只需上传 PDF，链接和二维码会随发布自动提取。原 PDF 的 **PDF** 按钮继续保留。
 
 ## 自动发布
 
 - Pages 发布来源使用 **GitHub Actions**，工作流为 `.github/workflows/publish.yml`。
-- 自动流程：Poppler 将 PDF 渲染为跨页 → 拆页并调整封面顺序 → Pages 生成静态 HTML 和分辨率不同的图片 → GitHub Pages 发布。
+- 自动流程：Poppler 将 PDF 渲染为跨页 → pypdf/pdfplumber 提取链接和目录、ZXing-C++ 识别二维码 → 拆页并调整封面顺序及链接坐标 → Pages 生成静态 HTML 和分辨率不同的图片 → GitHub Pages 发布。
 - 渲染和发布都在此 GitHub 仓库的 Actions 中完成，不上传到 Pages 作者的演示站或任何第三方转换网站。
 - 页面运行时只请求此站点内的文件，无外部 CDN、统计或付费服务。GitHub 的免费额度与服务政策仍适用。
 - 首次打开可能有缓存更新延迟。判断发布结果应检查公开阅读链接，不能只看绿色状态。
@@ -35,6 +39,6 @@
 - PagesEngine：`6c585892900409b2f794afb34c9ad3dc4e6f715d`，MIT，许可证保存在 `vendor/pages/ENGINE-LICENSE`。
 - 二维码：qrcode-generator 1.4.4，MIT。
 - `vendor/pages/` 保留生成器、阅读样式及模块源码。引擎由该版本源码编译，JS 和 CSS 一同保存。
-- 本项目适配：独立封面；横竖屏切换时更新引擎显示模式并保留当前页；初始页码；分享链接、二维码、原 PDF 入口；PDF 自动生成与部署。
+- 本项目适配：独立封面；横竖屏切换时更新引擎显示模式并保留当前页；初始页码；分享链接、二维码、原 PDF 入口；PDF 自动生成与部署；目录、原 PDF 超链接及二维码点击区域；接入 Pages 既有目录和链接菜单。
 
-开发时先运行 `python scripts/render-issues.py`，再运行 `node scripts/build-site.mjs`。需要 Python/Pillow、Poppler 的 `pdftoppm` 和 Node.js。输出 `_site/`；Windows 可用 `PDFTOPPM` 环境变量指定 `pdftoppm.exe` 的绝对路径。
+开发时先安装 `scripts/requirements.txt` 中的 Python 依赖，运行 `python scripts/render-issues.py`，再运行 `node scripts/build-site.mjs`。需要 Poppler 的 `pdftoppm` 和 Node.js。输出 `_site/`；Windows 可用 `PDFTOPPM` 环境变量指定 `pdftoppm.exe` 的绝对路径。`python -m unittest discover -s tests` 检查实际 PDF 的目录、链接和二维码，`node --test tests/reader-inputs.test.mjs` 检查浮动栏及缩放输入。

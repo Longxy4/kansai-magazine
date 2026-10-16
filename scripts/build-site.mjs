@@ -20,9 +20,11 @@ const license = await read('vendor/pages/ENGINE-LICENSE');
 const extraCss = await read('scripts/reader-dock.css');
 for (const issue of issues) {
     const pages = JSON.parse(await read('.build/'+issue+'/pages.json'));
+    const interactions = JSON.parse(await read('.build/'+issue+'/interactions.json'));
     const book = await generateFlipbookHtml(pages, {
-        title:'関西通信 '+issue+' | freebird Kansai',mode:'folder',doubleSpread:false,extraCss
-    }, {loadCss:async()=>css,loadJs:async()=>js,loadPageFlipJs:async()=>engine});
+        title:'関西通信 '+issue+' | freebird Kansai',mode:'folder',doubleSpread:false,extraCss,
+        tableOfContents:interactions.tableOfContents
+    }, {loadCss:async()=>css,loadJs:async()=>js,loadPageFlipJs:async()=>engine}, [], interactions.pageLinks);
     let html = book.html.replace('<html lang="en">','<html lang="ja" data-issue="'+issue+'">');
     // Move the dock out of the perspective container, so fixed positioning
     // uses the viewport and never overlaps the space reserved for the book.

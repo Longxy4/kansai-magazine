@@ -8,6 +8,7 @@ import re
 import subprocess
 import tempfile
 from PIL import Image
+from pdf_interactions import extract_interactions
 
 root = Path(__file__).resolve().parents[1]
 poppler = os.environ.get('PDFTOPPM', 'pdftoppm')
@@ -27,6 +28,7 @@ for pdf in sorted((root / 'issues').glob('*.pdf')):
                         key=lambda p: int(p.stem.split('-')[-1]))
         if not images:
             raise ValueError(f'No pages in {pdf.name}')
+        interactions = extract_interactions(pdf, images)
 
         def variants(image):
             output = []
@@ -55,4 +57,7 @@ for pdf in sorted((root / 'issues').glob('*.pdf')):
                     result.extend((variants(left), variants(right)))
         result.append(back)
     (build / 'pages.json').write_text(json.dumps(result), encoding='utf-8')
-    print(f'{issue}: {len(result)} reading pages', flush=True)
+    (build / 'interactions.json').write_text(json.dumps(interactions, ensure_ascii=False), encoding='utf-8')
+    links = [link for page in interactions['pageLinks'] for link in page['links']]
+    print(f"{issue}: {len(result)} reading pages, {len(interactions['tableOfContents'])} contents entries, "
+          f"{len(links)} clickable areas ({sum(l['source'] == 'qr' for l in links)} QR codes)", flush=True)

@@ -197,7 +197,7 @@ function setupLinks(pageFlip, config, wrapper) {
             }
 
             if (targetPage && pageFlip) {
-                handleZoomNavigation(() => pageFlip.flip(targetPage - 1));
+                handleZoomNavigation(() => pageFlip.turnToPage(targetPage - 1));
             }
             return;
         }
@@ -209,7 +209,7 @@ function setupLinks(pageFlip, config, wrapper) {
 
             const pageNum = parseInt(targetPageAttr, 10);
             if (!isNaN(pageNum) && pageFlip) {
-                handleZoomNavigation(() => pageFlip.flip(pageNum - 1));
+                handleZoomNavigation(() => pageFlip.turnToPage(pageNum - 1));
             }
             return;
         }

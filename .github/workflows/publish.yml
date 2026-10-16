@@ -27,7 +27,9 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y poppler-utils
-          python -m pip install Pillow==12.3.0
+          python -m pip install -r scripts/requirements.txt
+      - name: Check PDF interactions
+        run: python -m unittest discover -s tests -p 'test_*.py'
       - name: Render PDFs and generate Pages readers
         run: |
           python scripts/render-issues.py

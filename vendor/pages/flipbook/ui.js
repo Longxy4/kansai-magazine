@@ -45,13 +45,16 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     // Reuse Pages' active state and hide timer. Only the bottom edge reveals it.
     const nearBottom = y => y >= window.innerHeight - 96;
     document.addEventListener('pointermove', e => {
-        if (e.pointerType === 'touch' || document.querySelector('dialog[open]')) return;
+        if (e.pointerType === 'touch' || document.querySelector('dialog[open], .toc-modal:not(.hidden)')) return;
+        // A low-positioned PDF link/QR must stay clickable without summoning
+        // the dock over the pointer before its click reaches the link.
+        if (e.target.closest?.('a.pdf-link')) { deactivateControlPanel(); return; }
         if (nearBottom(e.clientY)) activateControlPanel();
         else deactivateControlPanel();
     }, { passive: true });
     document.documentElement.addEventListener('pointerleave', deactivateControlPanel);
     document.addEventListener('touchstart', e => {
-        if (e.touches.length !== 1 || document.querySelector('dialog[open]')) return;
+        if (e.touches.length !== 1 || document.querySelector('dialog[open], .toc-modal:not(.hidden)') || e.target.closest?.('a.pdf-link')) return;
         if (nearBottom(e.touches[0].clientY) && !controlsPanel.contains(e.target)) {
             // Consume the reveal tap so it does not also turn the magazine page.
             if (e.cancelable) e.preventDefault();
@@ -111,7 +114,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
         zoomSlider.dispatchEvent(new Event('input', { bubbles: true }));
     }
     document.addEventListener('wheel', e => {
-        if (!e.ctrlKey || document.querySelector('dialog[open]')) return;
+        if (!e.ctrlKey || document.querySelector('dialog[open], .toc-modal:not(.hidden)')) return;
         e.preventDefault();
         if (e.deltaY) adjustZoom(e.deltaY < 0 ? 0.1 : -0.1);
     }, { passive: false });
@@ -190,12 +193,19 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
         tocBtn.style.display = 'flex';
         function renderTOC(items, container, level = 0) {
             items.forEach(item => {
-                const itemEl = document.createElement('div');
+                const itemEl = document.createElement('button');
+                itemEl.type = 'button';
                 itemEl.className = `toc-item toc-level-${level}`;
                 // Add data-page attribute for Active TOC logic
                 itemEl.setAttribute('data-page', item.page);
 
-                itemEl.innerHTML = `<span class="toc-item-title">${item.title}</span><span class="toc-item-page">${item.page}</span>`;
+                const titleEl = document.createElement('span');
+                titleEl.className = 'toc-item-title';
+                titleEl.textContent = item.title;
+                const numberEl = document.createElement('span');
+                numberEl.className = 'toc-item-page';
+                numberEl.textContent = item.page;
+                itemEl.append(titleEl, numberEl);
                 itemEl.addEventListener('click', () => {
                     if (pageFlip) {
                         handleZoomNavigation(() => {
@@ -266,7 +276,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
 
             const pageContainers = document.querySelectorAll('.page-container');
             const indices = [activeIndex];
-            if (display === 'double') indices.push(activeIndex + 1);
+            if (display === 'double' && activeIndex > 0 && activeIndex < pageCount - 1) indices.push(activeIndex + 1);
 
             const links = [];
             indices.forEach(idx => {
@@ -330,7 +340,8 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
         const renderLinks = (links) => {
             linksList.innerHTML = '';
             links.forEach(link => {
-                const itemEl = document.createElement('div');
+                const itemEl = document.createElement('button');
+                itemEl.type = 'button';
                 itemEl.className = 'toc-item';
 
                 let targetText = '';
@@ -415,17 +426,21 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
                     }
                 }
 
-                itemEl.innerHTML = `
-                    ${previewHtml}
-                    <div class="toc-item-text">
-                        <span class="toc-item-title">${link.title}</span>
-                        <span class="toc-item-page">${targetText}</span>
-                    </div>
-                `;
+                itemEl.innerHTML = previewHtml;
+                const textEl = document.createElement('span');
+                textEl.className = 'toc-item-text';
+                const titleEl = document.createElement('span');
+                titleEl.className = 'toc-item-title';
+                titleEl.textContent = link.title;
+                const targetEl = document.createElement('span');
+                targetEl.className = 'toc-item-page';
+                targetEl.textContent = targetText;
+                textEl.append(titleEl, targetEl);
+                itemEl.appendChild(textEl);
 
                 itemEl.addEventListener('click', () => {
                     if (link.url) {
-                        window.open(link.url, '_blank');
+                        window.open(link.url, '_blank', 'noopener,noreferrer');
                     } else if (link.targetPage) {
                         const pageNum = parseInt(link.targetPage, 10);
                         if (!isNaN(pageNum)) {
@@ -451,6 +466,11 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
             openLinks();
         });
         if (linksCloseBtn) linksCloseBtn.addEventListener('click', closeLinks);
+        const linksOverlay = linksModal.querySelector('.toc-overlay');
+        if (linksOverlay) linksOverlay.addEventListener('click', closeLinks);
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeLinks();
+        });
 
         // Expose to window for main.js to call
         window.updateLinksButtonVisibility = updateLinksButtonVisibility;
@@ -461,7 +481,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
 
     // Keyboard navigation
     document.addEventListener('keydown', e => {
-        if (document.querySelector('dialog[open]') || e.target.isContentEditable ||
+        if (document.querySelector('dialog[open], .toc-modal:not(.hidden)') || e.target.isContentEditable ||
             ['TEXTAREA', 'SELECT'].includes(e.target.tagName) ||
             (e.target.tagName === 'INPUT' && e.target.type !== 'range')) return;
         if (!e.altKey) {

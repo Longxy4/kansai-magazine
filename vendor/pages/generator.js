@@ -152,7 +152,7 @@ function renderPdfLinks(links) {
             attr = `href="#page=${link.pageNumber}" data-target-page="${link.pageNumber}"`;
         }
 
-        return `<a class="pdf-link" style="${style}" ${attr} title="${escapeAttr(link.title || '')}" data-source-top="${link.top}" data-source-left="${link.left}" data-source-width="${link.width}" data-source-height="${link.height}"></a>`;
+        return `<a class="pdf-link" style="${style}" ${attr} title="${escapeAttr(link.title || '')}" aria-label="${escapeAttr(link.title || '')}" data-link-source="${escapeAttr(link.source || 'pdf')}" data-source-top="${link.top}" data-source-left="${link.left}" data-source-width="${link.width}" data-source-height="${link.height}"></a>`;
     }).join('');
 }
 
@@ -404,7 +404,7 @@ ENRICHMENT GUIDE:
             <div class="toc-overlay"></div>
             <div class="toc-content">
                 <div class="toc-header">
-                    <h2>Table of Contents</h2>
+                    <h2>目次</h2>
                     <button id="toc-close-btn" aria-label="Close">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 6L6 18M6 6l12 12"/>
@@ -419,7 +419,7 @@ ENRICHMENT GUIDE:
             <div class="toc-overlay"></div>
             <div class="toc-content">
                 <div class="toc-header">
-                    <h2>Page Links</h2>
+                    <h2>このページのリンク</h2>
                     <button id="links-close-btn" aria-label="Close">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 6L6 18M6 6l12 12"/>
@@ -438,9 +438,9 @@ ENRICHMENT GUIDE:
             pageCount: ${actualPageCount},
             doubleSpread: ${doubleSpread},
             pageAspectRatio: ${aspectRatio},
-            linkMap: ${JSON.stringify(options.linkMap || {})},
-            tableOfContents: ${JSON.stringify(options.tableOfContents || [])},
-            pageLinks: ${JSON.stringify(options.pageLinks || [])}
+            linkMap: ${JSON.stringify(options.linkMap || {}).replace(/</g, '\\u003c')},
+            tableOfContents: ${JSON.stringify(options.tableOfContents || []).replace(/</g, '\\u003c')},
+            pageLinks: ${JSON.stringify(options.pageLinks || []).replace(/</g, '\\u003c')}
         };
     </script>
     <script>${pageFlipJs}</script>
