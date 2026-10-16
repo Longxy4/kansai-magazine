@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetPage = getPageFromHash(pageCount);
             if (targetPage !== null && pageFlip) {
                 isUpdatingFromHash = true;
-                pageFlip.flip(targetPage - 1);
+                pageFlip.turnToPage(targetPage - 1);
                 setTimeout(() => {
                     isUpdatingFromHash = false;
                 }, 100);

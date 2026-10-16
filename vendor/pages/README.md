@@ -9,4 +9,4 @@ Commit: 6c585892900409b2f794afb34c9ad3dc4e6f715d
 License: MIT; see ENGINE-LICENSE.
 engine.js and engine.css were bundled from src/PageFlip.ts with esbuild 0.25.12, IIFE global name St.
 
-Local patches: showCover enabled; resize updates display mode and page aspect ratio, recreates spread collection only when switching mode; initial page number and input minimum corrected. scripts/reader-extras.js adds magazine sharing controls. The PDF processor is a build-time Poppler/Pillow adapter; the original Pages generator, UI, animation, navigation and zoom modules remain in use.
+Local patches: showCover enabled; resize updates display mode and page aspect ratio, recreates spread collection only when switching mode; initial page number and input minimum corrected; page-number/hash jumps use the engine's immediate turnToPage API to avoid jumping animations from cover pages. scripts/reader-extras.js adds magazine sharing controls. The PDF processor is a build-time Poppler/Pillow adapter; the original Pages generator, UI, animation, navigation and zoom modules remain in use.

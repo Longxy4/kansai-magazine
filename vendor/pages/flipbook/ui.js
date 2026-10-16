@@ -121,11 +121,15 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
 
     // Page input handler
     if (pageInput) {
-        pageInput.addEventListener('change', e => {
-            const targetPage = parseInt(e.target.value);
+        const jumpToInput = () => {
+            const targetPage = parseInt(pageInput.value, 10);
             if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= pageCount) {
-                handleZoomNavigation(() => pageFlip.flip(targetPage - 1));
+                handleZoomNavigation(() => pageFlip.turnToPage(targetPage - 1));
             }
+        };
+        pageInput.addEventListener('change', jumpToInput);
+        pageInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); jumpToInput(); pageInput.blur(); }
         });
 
         // Blur input when tapping outside (dismisses keyboard on mobile)
@@ -151,7 +155,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
                 itemEl.addEventListener('click', () => {
                     if (pageFlip) {
                         handleZoomNavigation(() => {
-                            pageFlip.flip(item.page - 1);
+                            pageFlip.turnToPage(item.page - 1);
                             closeTOC();
                         });
                     }
@@ -382,7 +386,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
                         const pageNum = parseInt(link.targetPage, 10);
                         if (!isNaN(pageNum)) {
                             console.log('Links Modal: Flipping to page', pageNum);
-                            handleZoomNavigation(() => pageFlip.flip(pageNum - 1));
+                            handleZoomNavigation(() => pageFlip.turnToPage(pageNum - 1));
                         }
                     }
                     closeLinks();
