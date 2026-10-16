@@ -30,7 +30,7 @@ for (const issue of issues) {
     const dockEnd = html.indexOf('        <div id="toc-modal"', dockStart);
     const dock = html.slice(dockStart, dockEnd);
     html = html.slice(0, dockStart) + html.slice(dockEnd);
-    html = html.replace('</body>', `${dock}<dialog id="share-dialog" aria-label="この号を共有"><strong>この号を共有</strong><div id="qr-container"></div><input id="share-url" aria-label="共有リンク" readonly><button id="copy-share">リンクをコピー</button><p id="share-status" role="status" aria-live="polite" hidden></p><button id="close-share">閉じる</button></dialog><script src="../../vendor/qrcode.js"></script><script>${extraJs}</script><!-- Based on S-poony/Pages (MIT). PagesEngine license:\n${license} -->\n</body>`);
+    html = html.replace('</body>', `${dock}<dialog id="share-dialog" aria-label="この号を共有"><strong>この号を共有</strong><div id="qr-container"></div><input id="share-url" aria-label="共有リンク" readonly><button id="copy-share">リンクをコピー</button><button id="close-share">閉じる</button></dialog><script src="../../vendor/qrcode.js"></script><script>${extraJs}</script><!-- Based on S-poony/Pages (MIT). PagesEngine license:\n${license} -->\n</body>`);
     html = html.replace('__ISSUE_PDF__', '../../issues/' + issue + '.pdf');
     const folder = path.join(out, 'read', issue);
     await mkdir(path.join(folder, 'images'), {recursive:true});

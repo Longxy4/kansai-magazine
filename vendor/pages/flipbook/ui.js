@@ -19,8 +19,10 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     };
 
     const deactivateControlPanel = () => {
-        if (isUsingSlider) return;
+        const hoveringControls = controlsPanel && matchMedia('(hover: hover)').matches && controlsPanel.matches(':hover');
+        if (isUsingSlider || hoveringControls || controlsPanelTimeout !== null) return;
         controlsPanelTimeout = setTimeout(() => {
+            controlsPanelTimeout = null;
             if (controlsPanel) controlsPanel.classList.remove('active');
             if (topControlsPanel) topControlsPanel.classList.remove('active');
         }, 1000);
@@ -40,12 +42,36 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
         });
     }
 
+    // Reuse Pages' active state and hide timer. Only the bottom edge reveals it.
+    const nearBottom = y => y >= window.innerHeight - 96;
+    document.addEventListener('pointermove', e => {
+        if (e.pointerType === 'touch' || document.querySelector('dialog[open]')) return;
+        if (nearBottom(e.clientY)) activateControlPanel();
+        else deactivateControlPanel();
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', deactivateControlPanel);
+    document.addEventListener('touchstart', e => {
+        if (e.touches.length !== 1 || document.querySelector('dialog[open]')) return;
+        if (nearBottom(e.touches[0].clientY) && !controlsPanel.contains(e.target)) {
+            // Consume the reveal tap so it does not also turn the magazine page.
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+            activateControlPanel();
+            deactivateControlPanel();
+        }
+    }, { capture: true, passive: false });
+    if (controlsPanel) {
+        controlsPanel.addEventListener('focusin', activateControlPanel);
+        controlsPanel.addEventListener('focusout', e => {
+            if (!controlsPanel.contains(e.relatedTarget)) deactivateControlPanel();
+        });
+    }
+
     // Fullscreen button handler
     if (fullscreenBtn) {
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 if (typeof document.documentElement.requestFullscreen !== 'function') {
-                    document.getElementById('share-status').textContent = 'この端末では全画面表示を利用できません';
                     return;
                 }
                 document.documentElement.requestFullscreen().catch(err => {
@@ -63,6 +89,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
         const isClickInsideTopControls = topControlsPanel && topControlsPanel.contains(e.target);
         if (isUsingSlider) return;
         if (!isClickInsideControls && !isClickInsideTopControls) {
+            if (nearBottom(e.clientY)) return;
             if (controlsPanel) controlsPanel.classList.remove('active');
             if (topControlsPanel) topControlsPanel.classList.remove('active');
             if (controlsPanelTimeout) {
@@ -71,6 +98,23 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
             }
         }
     });
+
+    // Shortcuts feed the original slider input handler, sharing its clamping,
+    // transform, pan constraints and debounced high-resolution image update.
+    function adjustZoom(delta) {
+        if (!zoomSlider) return;
+        const current = parseFloat(zoomSlider.value);
+        const next = Math.max(parseFloat(zoomSlider.min), Math.min(parseFloat(zoomSlider.max),
+            Math.round((current + delta) * 100) / 100));
+        if (next === current) return;
+        zoomSlider.value = String(next);
+        zoomSlider.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    document.addEventListener('wheel', e => {
+        if (!e.ctrlKey || document.querySelector('dialog[open]')) return;
+        e.preventDefault();
+        if (e.deltaY) adjustZoom(e.deltaY < 0 ? 0.1 : -0.1);
+    }, { passive: false });
 
     // Zoom Slider
     if (zoomSlider) {
@@ -417,7 +461,19 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
 
     // Keyboard navigation
     document.addEventListener('keydown', e => {
-        if (document.querySelector('dialog[open]') || ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        if (document.querySelector('dialog[open]') || e.target.isContentEditable ||
+            ['TEXTAREA', 'SELECT'].includes(e.target.tagName) ||
+            (e.target.tagName === 'INPUT' && e.target.type !== 'range')) return;
+        if (!e.altKey) {
+            const plus = ['+', '='].includes(e.key) || e.code === 'NumpadAdd';
+            const minus = e.key === '-' || e.code === 'NumpadSubtract';
+            if (plus || minus) {
+                e.preventDefault();
+                adjustZoom(plus ? 0.1 : -0.1);
+                return;
+            }
+        }
+        if (e.target.tagName === 'INPUT') return;
         if (isZoomed()) {
             if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
             return;
