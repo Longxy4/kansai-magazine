@@ -46,6 +46,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     const nearBottom = y => y >= window.innerHeight - 96;
     document.addEventListener('pointermove', e => {
         if (e.pointerType === 'touch' || document.querySelector('dialog[open], .toc-modal:not(.hidden)')) return;
+        if (document.querySelector('.page-sidebar:not(.hidden)') || e.target.closest?.('.page-sidebar, #toc-btn')) return;
         // A low-positioned PDF link/QR must stay clickable without summoning
         // the dock over the pointer before its click reaches the link.
         if (e.target.closest?.('a.pdf-link')) { deactivateControlPanel(); return; }
@@ -55,6 +56,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
     document.documentElement.addEventListener('pointerleave', deactivateControlPanel);
     document.addEventListener('touchstart', e => {
         if (e.touches.length !== 1 || document.querySelector('dialog[open], .toc-modal:not(.hidden)') || e.target.closest?.('a.pdf-link')) return;
+        if (e.target.closest?.('.page-sidebar, #toc-btn')) return;
         if (nearBottom(e.touches[0].clientY) && !controlsPanel.contains(e.target)) {
             // Consume the reveal tap so it does not also turn the magazine page.
             if (e.cancelable) e.preventDefault();
@@ -238,31 +240,13 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
             if (activeItem) {
                 activeItem.classList.add('active');
                 // Only scroll if TOC is visible to avoid unnecessary layout calculations
-                if (!tocModal.classList.contains('hidden')) {
+                if (!tocModal.classList.contains('hidden') && !tocList.hidden) {
                     activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         };
 
-        const openTOC = () => {
-            tocModal.classList.remove('hidden');
-            // Update active item when opening just in case
-            if (window.pageFlip) {
-                window.updateActiveTOC(window.pageFlip.getCurrentPageIndex() + 1);
-            }
-        };
-        const closeTOC = () => tocModal.classList.add('hidden');
-        tocBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openTOC();
-        });
-        if (tocCloseBtn) tocCloseBtn.addEventListener('click', closeTOC);
-        if (tocOverlay) tocOverlay.addEventListener('click', closeTOC);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !tocModal.classList.contains('hidden')) {
-                closeTOC();
-            }
-        });
+        const closeTOC = () => window.closePageSidebar();
     }
 
     // Page Links List
@@ -352,7 +336,7 @@ function setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topC
                 }
 
                 let previewHtml = '';
-                if (link.sourceArea && !isNaN(link.sourceArea.top)) {
+                if (window.FLIPBOOK_CONFIG.linkPreviews !== false && link.sourceArea && !isNaN(link.sourceArea.top)) {
                     const pageContainers = document.querySelectorAll('.page-container');
                     const sourcePageEl = pageContainers[link.sourcePageIndex];
                     if (sourcePageEl) {

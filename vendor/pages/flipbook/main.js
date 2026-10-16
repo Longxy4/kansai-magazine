@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize UI and Links AFTER pageFlip is ready
         setupUI(pageCount, pageInput, zoomSlider, zoomText, controlsPanel, topControlsPanel, fullscreenBtn, wrapper, tocBtn, tableOfContents, tocModal, tocList, tocCloseBtn, tocOverlay, prevPageBtn, nextPageBtn, pageLinksBtn, linksModal, linksList, linksCloseBtn);
+        setupPageSidebar(pageFlip, config);
         if (typeof setupLinks === 'function') {
             setupLinks(pageFlip, config, wrapper);
         }

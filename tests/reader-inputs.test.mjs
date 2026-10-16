@@ -56,3 +56,10 @@ test('PDF links and QR codes near the bottom remain clickable without revealing 
   assert.equal(e.prevented,undefined);assert.equal(e.stopped,undefined);
   assert.equal(f.controls.classes.has('active'),false);
 });
+
+test('tapping low-positioned sidebar thumbnails is not consumed by the bottom dock',()=>{
+  const f=fixture(),target={tagName:'A',closest:selector=>selector.includes('.page-sidebar')?{}:null};
+  const e=f.emit('touchstart',{target,touches:[{clientY:710}],cancelable:true,stopPropagation(){this.stopped=true;}});
+  assert.equal(e.prevented,undefined);assert.equal(e.stopped,undefined);
+  assert.equal(f.controls.classes.has('active'),false);
+});

@@ -381,7 +381,6 @@ ENRICHMENT GUIDE:
             <div id="flipbook" data-double-spread="${doubleSpread}">${pagesHtml}</div>
         </div>
         <div id="controls-panel" role="toolbar" aria-label="閲覧操作">
-            <button id="toc-btn" class="icon-btn" aria-label="Table of Contents" style="display:none">目次</button>
             <div class="page-input-container">
                 <button id="prev-page-btn" class="page-nav-btn" aria-label="Previous Page">‹</button>
                 <input type="number" id="page-input" aria-label="Page number" min="1" max="${actualPageCount}" value="1">
@@ -400,20 +399,18 @@ ENRICHMENT GUIDE:
             <button id="page-links-btn" class="icon-btn" aria-label="Page Links" style="display:none">リンク</button>
         </div>
 
-        <div id="toc-modal" class="toc-modal hidden">
-            <div class="toc-overlay"></div>
-            <div class="toc-content">
-                <div class="toc-header">
-                    <h2>目次</h2>
-                    <button id="toc-close-btn" aria-label="Close">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                    </button>
+        <button id="toc-btn" aria-label="ページと目次を開く" aria-controls="toc-modal" aria-expanded="false"></button>
+        <aside id="toc-modal" class="page-sidebar hidden" aria-label="ページと目次" aria-hidden="true" inert>
+            <div class="sidebar-header">
+                <div class="sidebar-tabs" role="tablist" aria-label="ナビゲーション表示">
+                    <button id="thumbnail-tab" role="tab" aria-selected="true" aria-controls="thumbnail-list">ページ</button>
+                    <button id="contents-tab" role="tab" aria-selected="false" aria-controls="toc-list" tabindex="-1">目次</button>
                 </div>
-                <div id="toc-list" class="toc-list"></div>
+                <button id="toc-close-btn" aria-label="サイドバーを閉じる">‹</button>
             </div>
-        </div>
+            <nav id="thumbnail-list" role="tabpanel" aria-labelledby="thumbnail-tab"></nav>
+            <nav id="toc-list" class="toc-list" role="tabpanel" aria-labelledby="contents-tab" hidden></nav>
+        </aside>
 
         <div id="links-modal" class="toc-modal hidden">
             <div class="toc-overlay"></div>
@@ -438,6 +435,7 @@ ENRICHMENT GUIDE:
             pageCount: ${actualPageCount},
             doubleSpread: ${doubleSpread},
             pageAspectRatio: ${aspectRatio},
+            linkPreviews: ${options.linkPreviews !== false},
             linkMap: ${JSON.stringify(options.linkMap || {}).replace(/</g, '\\u003c')},
             tableOfContents: ${JSON.stringify(options.tableOfContents || []).replace(/</g, '\\u003c')},
             pageLinks: ${JSON.stringify(options.pageLinks || []).replace(/</g, '\\u003c')}

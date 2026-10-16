@@ -11,7 +11,7 @@ await copyFile(path.join(root, 'vendor/qrcode.js'), path.join(out, 'vendor/qrcod
 await writeFile(path.join(out, '.nojekyll'), '');
 const issues = (await readdir(path.join(root, 'issues'))).filter(n => /^\d{4}-(0[1-9]|1[0-2])\.pdf$/.test(n)).map(n=>n.slice(0,-4)).sort();
 if (!issues.length) throw Error('No issues found');
-const names = ['utils','state','navigation','scaling','zoom','pageflip','ui','links','main'];
+const names = ['utils','state','navigation','scaling','zoom','pageflip','ui','links','sidebar','main'];
 const js = (await Promise.all(names.map(n=>read('vendor/pages/flipbook/'+n+'.js')))).join('\n');
 const css = await read('vendor/pages/engine.css') + '\n' + await read('vendor/pages/flipbook.css');
 const engine = await read('vendor/pages/engine.js');
@@ -23,16 +23,18 @@ for (const issue of issues) {
     const interactions = JSON.parse(await read('.build/'+issue+'/interactions.json'));
     const book = await generateFlipbookHtml(pages, {
         title:'関西通信 '+issue+' | freebird Kansai',mode:'folder',doubleSpread:false,extraCss,
-        tableOfContents:interactions.tableOfContents
+        tableOfContents:interactions.tableOfContents,linkPreviews:false
     }, {loadCss:async()=>css,loadJs:async()=>js,loadPageFlipJs:async()=>engine}, [], interactions.pageLinks);
     let html = book.html.replace('<html lang="en">','<html lang="ja" data-issue="'+issue+'">');
     // Move the dock out of the perspective container, so fixed positioning
     // uses the viewport and never overlaps the space reserved for the book.
     const dockStart = html.indexOf('        <div id="controls-panel"');
-    const dockEnd = html.indexOf('        <div id="toc-modal"', dockStart);
+    const dockEnd = html.indexOf('        <button id="toc-btn"', dockStart);
     const dock = html.slice(dockStart, dockEnd);
-    html = html.slice(0, dockStart) + html.slice(dockEnd);
-    html = html.replace('</body>', `${dock}<dialog id="share-dialog" aria-label="この号を共有"><strong>この号を共有</strong><div id="qr-container"></div><input id="share-url" aria-label="共有リンク" readonly><button id="copy-share">リンクをコピー</button><button id="close-share">閉じる</button></dialog><script src="../../vendor/qrcode.js"></script><script>${extraJs}</script><!-- Based on S-poony/Pages (MIT). PagesEngine license:\n${license} -->\n</body>`);
+    const sidebarEnd = html.indexOf('        <div id="links-modal"', dockEnd);
+    const sidebar = html.slice(dockEnd, sidebarEnd);
+    html = html.slice(0, dockStart) + html.slice(sidebarEnd);
+    html = html.replace('</body>', `${sidebar}${dock}<dialog id="share-dialog" aria-label="この号を共有"><strong>この号を共有</strong><div id="qr-container"></div><input id="share-url" aria-label="共有リンク" readonly><button id="copy-share">リンクをコピー</button><button id="close-share">閉じる</button></dialog><script src="../../vendor/qrcode.js"></script><script>${extraJs}</script><!-- Based on S-poony/Pages (MIT). PagesEngine license:\n${license} -->\n</body>`);
     html = html.replace('__ISSUE_PDF__', '../../issues/' + issue + '.pdf');
     const folder = path.join(out, 'read', issue);
     await mkdir(path.join(folder, 'images'), {recursive:true});

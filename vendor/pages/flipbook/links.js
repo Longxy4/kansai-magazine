@@ -238,6 +238,7 @@ function setupLinks(pageFlip, config, wrapper) {
 
     // Hover listeners
     document.addEventListener('mouseover', (e) => {
+        if (config.linkPreviews === false) return;
         const link = e.target.closest('a');
         if (!link) return;
 
@@ -266,6 +267,7 @@ function setupLinks(pageFlip, config, wrapper) {
     });
 
     document.addEventListener('mouseout', (e) => {
+        if (config.linkPreviews === false) return;
         const link = e.target.closest('a');
         if (link && (!e.relatedTarget || !link.contains(e.relatedTarget))) {
             clearTimeout(showTimeout);
