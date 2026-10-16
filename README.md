@@ -1,21 +1,27 @@
-# 関西通信 デジタルブック
+# 関西通信电子杂志维护
 
-GitHub Pages で公開する freebird 関西支部の PDF ビューワーです。トップページの `index.html` を全号共通で使用します。
+直接阅读，无杂志首页：
+https://longxy4.github.io/kansai-magazine/?issue=2026-07
 
-## 初回公開
+## 每半年发布一期（全程在 GitHub 网页操作）
+1. 打开 https://github.com/Longxy4/kansai-magazine/tree/main/issues
+2. 点击 Add file → Upload files。
+3. 将 PDF 命名为 YYYY-MM.pdf，例如 2027-01.pdf，拖入上传框，点击 Commit changes 保存到 main。
+4. 等待仓库 Actions 中 Pages 部署变为绿色，再打开对应链接：
+   https://longxy4.github.io/kansai-magazine/?issue=2027-01
+5. 检查封面、下一页、最后一页及 QR，再将该期链接或二维码分享出去。旧期链接继续有效，无需改代码。
 
-1. GitHub の **Settings → Pages → Build and deployment** で **Deploy from a branch** / `main` / `/(root)` を指定します。
-2. **Add file → Upload files** から `issues/2026-07.pdf` を登録します。GitHub の Web UI では、先に `issues` フォルダーに入る（必要なら `issues/.gitkeep` を作る）方法が確実です。
-3. `https://longxy4.github.io/kansai-magazine/?issue=2026-07` を開きます。
+同一期修订：在 issues 文件夹上传同名 PDF 并覆盖。需要保留旧版时使用不同期号。
 
-## 次号の発行
+## PDF 格式
+每张 PDF 包含左右两个页面。首张右半为封面、左半为封底，其余按 PDF 顺序、先左后右阅读。本期 15 张跨页对应 30 个阅读页面。若未来 PDF 改为单页或印刷拼版格式，需先调整阅读器。
 
-`issues/YYYY-MM.pdf` という形式で PDF をアップロードしてください。例：`issues/2027-01.pdf` を追加すると、URL は `https://longxy4.github.io/kansai-magazine/?issue=2027-01` になります。コードの変更は不要です。
+## 阅读功能
+电脑默认双页，手机默认单页；可手动切换。支持首尾页、左右键、正常缩放下滑动翻页、放大后滚动查看、分享链接及本地生成二维码。PDF 按钮打开原文件，其中的原有链接可点击；阅读器中的画布不支持 PDF 内部链接。
 
-## 注意
+## 部署与依赖
+GitHub Pages 使用 main 分支根目录，免费静态托管。PDF 和脚本均保存在此仓库，阅读时不依赖外部 CDN，也不调用收费服务。供应商的免费额度和服务政策仍适用。
 
-このビューアーは **各 PDF ページが左右2つの誌面を含む印刷用見開き形式** を前提にしています。第1 PDF ページの右半分を表紙、左半分を裏表紙として扱い、第2ページ以降の各半分を本文として扱います。通常の1ページ1誌面のPDFにはそのままでは適しません。
+vendor/ 保存 PDF.js 4.10.38（Apache-2.0）及 qrcode-generator 1.4.4（MIT），升级时必须同时替换 PDF.js 主程序和 worker，并重新测试。
 
-外部 JavaScript CDN を利用するため、閲覧時はインターネット接続が必要です。GitHub Pages は公開サイトです。PDF 内の個人情報や写真について、事前に掲載許可を確認してください。
-
-PDF に直接埋め込まれたハイパーリンクはキャンバス描画ではクリックできません。ダウンロードした元の PDF では利用できます。
+无法阅读时检查：issues 中是否有完全匹配的文件名；Actions 的 Pages 部署是否完成；刷新页面后重试。不要只凭部署绿色就判断 PDF 已上传。
