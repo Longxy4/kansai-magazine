@@ -765,6 +765,13 @@ body:has(.toc-modal:not(.hidden),.page-sidebar:not(.hidden)) #controls-panel{opa
 #toc-btn{box-sizing:border-box;position:fixed;left:0;top:50%;bottom:auto;transform:translateY(-50%);z-index:3100;display:block;width:12px;height:96px;min-width:0;margin:0;padding:0;color:transparent;border:0;border-radius:0;background:transparent;box-shadow:none;cursor:pointer;opacity:0}
 #toc-btn:hover,#toc-btn:focus-visible{opacity:0;background:transparent;box-shadow:none}
 #toc-btn[aria-expanded=true]{opacity:0;pointer-events:auto;z-index:3300}
+/* Single-page curls stay inside one sheet, including when the book is zoomed. */
+#flipbook[data-display=single] .stf__block{clip-path:inset(0)}
+@media(max-width:600px), (hover:none) and (pointer:coarse){
+  #toc-btn,#toc-btn:hover,#toc-btn:focus-visible{opacity:1;background:rgba(69,58,50,.08);border-radius:0 5px 5px 0}
+  #toc-btn::after{content:"";position:absolute;left:5px;top:34px;width:2px;height:28px;border-radius:2px;background:rgba(69,58,50,.28);pointer-events:none}
+  #toc-btn[aria-expanded=true]{opacity:0}
+}
 .page-sidebar{box-sizing:border-box;position:fixed;inset:0 auto 0 0;z-index:3200;width:min(216px,75vw);height:100vh;height:100dvh;display:flex;flex-direction:column;background:#faf8f4;border-right:1px solid #e5ded5;box-shadow:4px 0 20px #0002;transform:translateX(0);visibility:visible;transition:transform .2s ease,visibility .2s}
 .page-sidebar.hidden{display:flex;transform:translateX(-100%);visibility:hidden;pointer-events:none}
 .page-sidebar [hidden]{display:none!important}
@@ -1418,7 +1425,7 @@ ENRICHMENT GUIDE:
             transform: translate3d(${i.x-n}px, ${i.y-100}px, 0) rotate(${s}rad);
             clip-path: ${a};
             -webkit-clip-path: ${a};
-        `;this.outerShadow.style.cssText=p}drawLeftPage(){this.orientation==="portrait"||this.leftPage===null||(this.direction===1&&this.flippingPage!==null&&this.flippingPage.getDrawingDensity()==="hard"?(this.leftPage.getElement().style.zIndex=(this.getSettings().startZIndex+5).toString(10),this.leftPage.setHardDrawingAngle(180+this.flippingPage.getHardAngle()),this.leftPage.draw(this.flippingPage.getDrawingDensity())):this.leftPage.simpleDraw(0))}drawRightPage(){this.rightPage!==null&&(this.direction===0&&this.flippingPage!==null&&this.flippingPage.getDrawingDensity()==="hard"?(this.rightPage.getElement().style.zIndex=(this.getSettings().startZIndex+5).toString(10),this.rightPage.setHardDrawingAngle(180+this.flippingPage.getHardAngle()),this.rightPage.draw(this.flippingPage.getDrawingDensity())):this.getSettings().display==="single"?this.rightPage.simpleDraw(0):this.rightPage.simpleDraw(1))}drawBottomPage(){if(this.bottomPage===null)return;let t=this.flippingPage!=null?this.flippingPage.getDrawingDensity():null;this.orientation==="portrait"&&this.direction===1||(this.bottomPage.getElement().style.zIndex=(this.getSettings().startZIndex+3).toString(10),this.bottomPage.draw(t))}drawGrowingShadow(){let t=this.getRect(),i=this.shadow;if(!i)return;if(!this.getSettings().flippingShadow){this.growingShadowContainer.style.display="none";return}let s=this.convertToGlobal({x:i.pos.x,y:i.pos.y}),n=i.angle+3*Math.PI/2,r=i.progress/100,o=this.getSettings().flippingShadowWidthOffset+i.width*this.getSettings().flippingShadowWidthScale*r,a=this.getSettings().flippingShadowOpacity,p=this.getSettings().flippingShadowStartAlpha*a,d=this.getSettings().flippingShadowEndAlpha*a,g=i.direction===0?"to left":"to right",c=i.direction===0?o:0,G=`
+        `;this.outerShadow.style.cssText=p}drawLeftPage(){this.getSettings().display==="single"||this.orientation==="portrait"||this.leftPage===null||(this.direction===1&&this.flippingPage!==null&&this.flippingPage.getDrawingDensity()==="hard"?(this.leftPage.getElement().style.zIndex=(this.getSettings().startZIndex+5).toString(10),this.leftPage.setHardDrawingAngle(180+this.flippingPage.getHardAngle()),this.leftPage.draw(this.flippingPage.getDrawingDensity())):this.leftPage.simpleDraw(0))}drawRightPage(){this.rightPage!==null&&(this.getSettings().display!=="single"&&this.direction===0&&this.flippingPage!==null&&this.flippingPage.getDrawingDensity()==="hard"?(this.rightPage.getElement().style.zIndex=(this.getSettings().startZIndex+5).toString(10),this.rightPage.setHardDrawingAngle(180+this.flippingPage.getHardAngle()),this.rightPage.draw(this.flippingPage.getDrawingDensity())):this.getSettings().display==="single"?this.rightPage.simpleDraw(0):this.rightPage.simpleDraw(1))}drawBottomPage(){if(this.bottomPage===null)return;let t=this.flippingPage!=null?this.flippingPage.getDrawingDensity():null;this.orientation==="portrait"&&this.direction===1||(this.bottomPage.getElement().style.zIndex=(this.getSettings().startZIndex+3).toString(10),this.bottomPage.draw(t))}drawGrowingShadow(){let t=this.getRect(),i=this.shadow;if(!i)return;if(!this.getSettings().flippingShadow){this.growingShadowContainer.style.display="none";return}let s=this.convertToGlobal({x:i.pos.x,y:i.pos.y}),n=i.angle+3*Math.PI/2,r=i.progress/100,o=this.getSettings().flippingShadowWidthOffset+i.width*this.getSettings().flippingShadowWidthScale*r,a=this.getSettings().flippingShadowOpacity,p=this.getSettings().flippingShadowStartAlpha*a,d=this.getSettings().flippingShadowEndAlpha*a,g=i.direction===0?"to left":"to right",c=i.direction===0?o:0,G=`
             display: block;
             z-index: ${(this.getSettings().startZIndex+4).toString(10)};
             position: absolute;
@@ -2878,7 +2885,7 @@ document.addEventListener('DOMContentLoaded', () => {
             minHeight: 100,
             maxHeight: 10000,
             autoSize: false,
-            showCover: true,
+            showCover: !isSingleMode,
             usePortrait: false,
             startPage: initialPage ? initialPage - 1 : 0,
             drawShadow: true,
@@ -2896,6 +2903,7 @@ document.addEventListener('DOMContentLoaded', () => {
             flippingShadowEndAlpha: 0,
             otherShadowOpacityScale: .5,
         });
+        flipbookEl.dataset.display = isSingleMode ? 'single' : 'double';
 
         updateEpubContentScale();
         pageFlip.loadFromHTML(document.querySelectorAll('.page-container'));
@@ -2983,6 +2991,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const settings = pageFlip.getSettings();
         const changed = settings.display !== (single ? 'single' : 'double');
         settings.display = single ? 'single' : 'double';
+        settings.showCover = !single;
+        flipbookEl.dataset.display = settings.display;
         settings.width = single ? dims.width : dims.width / 2;
         settings.height = dims.height;
         if (changed) pageFlip.updateFromHtml(window.FLIPBOOK_PAGES.map(p => p.cloneNode(true)));
