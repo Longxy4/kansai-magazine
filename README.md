@@ -10,6 +10,14 @@
 | --- | --- | --- |
 | 2026年7月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2026-07) | [PDFを開く](issues/2026-07.pdf) |
 | 2026年特別号（1月発行） | [読む](https://longxy4.github.io/kansai-magazine/?issue=2026-01) | [PDFを開く](issues/2026-01.pdf) |
+| 2025年9月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2025-09) | [PDFを開く](issues/関西通信2025年9月号.pdf) |
+| 2025年7月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2025-07) | [PDFを開く](issues/関西通信2025年7月号.pdf) |
+| 2025年5月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2025-05) | [PDFを開く](issues/関西通信2025年5月号.pdf) |
+| 2025年3月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2025-03) | [PDFを開く](issues/関西通信2025年3月号.pdf) |
+| 2025年特別号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2025-special) | [PDFを開く](issues/関西通信2025年特別号.pdf) |
+| 2024年9月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2024-09) | [PDFを開く](issues/関西通信2024年9月号.pdf) |
+| 2024年7月号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2024-07) | [PDFを開く](issues/関西通信2024年7月号.pdf) |
+| 2024年特別号 | [読む](https://longxy4.github.io/kansai-magazine/?issue=2024-special) | [PDFを開く](issues/関西通信2024年特別号.pdf) |
 
 [公開されているPDF一覧](https://github.com/Longxy4/kansai-magazine/tree/main/issues)
 
@@ -22,7 +30,7 @@
 2. [Actions の Publish magazine](https://github.com/Longxy4/kansai-magazine/actions/workflows/publish.yml) が成功したら、実際の閲覧リンクを確認します。
 3. 通常号の固定リンクは `https://longxy4.github.io/kansai-magazine/?issue=YYYY-MM` です。`2026年特別号.pdf` は `?issue=2026-special`、年のない特別号は `?issue=special` になります。閲覧画面の共有ボタンから固定リンクをコピーできます。バックナンバーの表にもリンクを追記できます。同じ号の訂正は同名PDFを上書きしてください。
 
-複数年の特別号を公開する場合は、ファイル名に年を付けてください。同じ号を別名で重複アップロードすると公開処理が停止します。公開済みの閲覧リンクはそのまま使えます。
+複数年の特別号を公開する場合は、ファイル名に年を付けてください。同一内容の PDF を別名でアップロードした場合は自動でまとめ、元の閲覧リンクを残します。同じ号に内容の異なる PDF が複数ある場合は公開処理が停止します。縦向きの単ページ PDF、横向きの見開き PDF、回転情報のある PDF に対応しています。
 
 閲覧システムのソースと詳しい管理手順は [kansai-magazine-system](https://github.com/Longxy4/kansai-magazine-system) にあります。システムを更新した後は、この公開用リポジトリで **Publish magazine → Run workflow** を実行します。
 
