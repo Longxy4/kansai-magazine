@@ -30,7 +30,7 @@
 2. [Actions の Publish magazine](https://github.com/Longxy4/kansai-magazine/actions/workflows/publish.yml) が成功したら、実際の閲覧リンクを確認します。
 3. 通常号の固定リンクは `https://longxy4.github.io/kansai-magazine/?issue=YYYY-MM` です。`2026年特別号.pdf` は `?issue=2026-special`、年のない特別号は `?issue=special` になります。閲覧画面の共有ボタンから固定リンクをコピーできます。バックナンバーの表にもリンクを追記できます。同じ号の訂正は同名PDFを上書きしてください。
 
-複数年の特別号を公開する場合は、ファイル名に年を付けてください。同一内容の PDF を別名でアップロードした場合は自動でまとめ、元の閲覧リンクを残します。同じ号に内容の異なる PDF が複数ある場合は公開処理が停止します。縦向きの単ページ PDF、横向きの見開き PDF、回転情報のある PDF に対応しています。
+複数年の特別号を公開する場合は、ファイル名に年を付けてください。同一内容の PDF を別名でアップロードした場合は自動でまとめ、元の閲覧リンクを残します。同じ号に内容の異なる PDF が複数ある場合は、使用中のファイルを優先し、競合するファイルだけをスキップします。変更のない PDF は変換済みページを再利用します。壊れた PDF や未対応のファイルは個別にスキップし、ほかの号の公開を続行します。更新に失敗した号は、前回の公開済み版を可能な限り残します。Actions の各実行の Summary で、再利用・変換・スキップの結果と理由を確認してください。縦向きの単ページ PDF、横向きの見開き PDF、回転情報のある PDF に対応しています。
 
 閲覧システムのソースと詳しい管理手順は [kansai-magazine-system](https://github.com/Longxy4/kansai-magazine-system) にあります。システムを更新した後は、この公開用リポジトリで **Publish magazine → Run workflow** を実行します。
 
